@@ -1,0 +1,29 @@
+.progress-container {
+  position: relative;
+  width: 100%;
+  height: 1rem;
+  background: #e5e7eb;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center; /* centers content vertically */
+  justify-content: center; /* centers content horizontally */
+}
+
+.progress-bar {
+  position: absolute; /* keep bar behind text */
+  height: 100%;
+  background: #111827;
+  transition: width 0.2s ease;
+  border-radius: 0.5rem;
+  left: 0;
+  top: 0;
+}
+
+.progress-text {
+  position: relative; /* no longer absolute */
+  font-size: 0.75rem;
+  color: white;
+  z-index: 1; /* make sure it appears above the bar */
+}
