@@ -14,9 +14,9 @@ export async function handler(event) {
     const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
     const apiUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
-    // ✅ Use URL-encoded form body instead of JSON
+    // ✅ Repackage into form-urlencoded
     const formBody = new URLSearchParams();
-    formBody.append("file", base64); // base64 string with prefix
+    formBody.append("file", base64); // "data:image/jpeg;base64,...."
     formBody.append("upload_preset", uploadPreset);
 
     const res = await fetch(apiUrl, {
@@ -47,3 +47,4 @@ export async function handler(event) {
     };
   }
 }
+

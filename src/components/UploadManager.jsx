@@ -41,9 +41,6 @@
 // }
 
 
-const UPLOAD_URL = import.meta.env.VITE_UPLOAD_URL;
-const APPSCRIPT_SECRET = import.meta.env.VITE_APPSCRIPT_SECRET;
-
 export async function uploadPhotos(photos, setProgress, setStatus, setPhotos) {
   if (!photos.length) return;
 
@@ -56,21 +53,32 @@ export async function uploadPhotos(photos, setProgress, setStatus, setPhotos) {
   await Promise.all(
     photos.map(async (photo) => {
       try {
-        const endpoint =
-          window.location.hostname === "localhost"
-            ? UPLOAD_URL // Google Drive dev
-            : "/.netlify/functions/upload-cloudinary"; // Cloudinary prod
+        const isLocal = window.location.hostname === "localhost";
+        const endpoint = isLocal
+          ? UPLOAD_URL // Google Drive dev
+          : "/.netlify/functions/upload-cloudinary"; // Cloudinary prod
 
-        // ✅ Strip filename when sending to Cloudinary
-        const payload =
-          window.location.hostname === "localhost"
-            ? { filename: photo.filename, base64: photo.preview, secret: APPSCRIPT_SECRET }
-            : { base64: photo.preview };
+        let payload;
+        let headers;
+
+        if (isLocal) {
+          // Google Drive flow = JSON
+          payload = JSON.stringify({
+            filename: photo.filename,
+            base64: photo.preview,
+            secret: APPSCRIPT_SECRET,
+          });
+          headers = { "Content-Type": "application/json" };
+        } else {
+          // Cloudinary flow = JSON with ONLY base64 (function will repackage)
+          payload = JSON.stringify({ base64: photo.preview });
+          headers = { "Content-Type": "application/json" };
+        }
 
         await fetch(endpoint, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          headers,
+          body: payload,
         });
       } catch (err) {
         console.error("Upload error:", err);
