@@ -1,6 +1,8 @@
 export async function handler(event) {
   try {
     const body = JSON.parse(event.body);
+    console.log("📥 Incoming body:", Object.keys(body));
+
     const { base64 } = body;
 
     if (!base64) {
@@ -14,9 +16,12 @@ export async function handler(event) {
     const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
     const apiUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
-    // ✅ Repackage into form-urlencoded
+    // ✅ Strip the prefix completely
+    const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
+
+    // ✅ Send only the raw base64, without re-adding the prefix
     const formBody = new URLSearchParams();
-    formBody.append("file", base64); // "data:image/jpeg;base64,...."
+    formBody.append("file", base64Data);
     formBody.append("upload_preset", uploadPreset);
 
     const res = await fetch(apiUrl, {
@@ -25,26 +30,33 @@ export async function handler(event) {
       body: formBody.toString(),
     });
 
-    const data = await res.json();
+    console.log("res = ", res);
+    console.log("body = ", formBody.toString())
 
+    const data = await res.json();
+    console.log("data = ", data)
     if (data.error) {
-      console.error("Cloudinary error:", data.error);
+      console.error("❌ Cloudinary error:", data.error);
       return {
         statusCode: 500,
         body: JSON.stringify({ error: data.error.message }),
       };
     }
 
+    console.log("✅ Upload success:", {
+      public_id: data.public_id,
+      secure_url: data.secure_url,
+    });
+
     return {
       statusCode: 200,
       body: JSON.stringify(data),
     };
   } catch (err) {
-    console.error("Upload error:", err);
+    console.error("💥 Upload error:", err);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Upload failed", details: err.message }),
     };
   }
 }
-
