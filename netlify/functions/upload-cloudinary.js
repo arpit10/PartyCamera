@@ -14,14 +14,15 @@ export async function handler(event) {
     const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
     const apiUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
-    // Cloudinary accepts JSON with base64 as long as you send content-type correctly
+    // ✅ Use URL-encoded form body instead of JSON
+    const formBody = new URLSearchParams();
+    formBody.append("file", base64); // base64 string with prefix
+    formBody.append("upload_preset", uploadPreset);
+
     const res = await fetch(apiUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        file: base64, // already includes "data:image/jpeg;base64,..."
-        upload_preset: uploadPreset,
-      }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formBody.toString(),
     });
 
     const data = await res.json();
