@@ -1,11 +1,8 @@
-import fetch from "node-fetch";
-import FormData from "form-data";
-
 export async function handler(event) {
   try {
     const body = JSON.parse(event.body);
-
     const { filename, base64 } = body;
+
     if (!filename || !base64) {
       return {
         statusCode: 400,
@@ -13,24 +10,28 @@ export async function handler(event) {
       };
     }
 
-    // Prepare Cloudinary upload API
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
     const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET; // unsigned preset
     const apiUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
-    // Strip base64 prefix
-    const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
-
-    const formData = new FormData();
-    formData.append("file", `data:image/jpeg;base64,${base64Data}`);
-    formData.append("upload_preset", uploadPreset);
-
+    // Send base64 directly to Cloudinary
     const res = await fetch(apiUrl, {
       method: "POST",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        file: base64, // already has data:image/jpeg;base64 prefix
+        upload_preset: uploadPreset,
+      }),
     });
 
     const data = await res.json();
+
+    if (data.error) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: data.error.message }),
+      };
+    }
 
     return {
       statusCode: 200,
@@ -40,7 +41,7 @@ export async function handler(event) {
     console.error("Upload error:", err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Upload failed" }),
+      body: JSON.stringify({ error: "Upload failed", details: err.message }),
     };
   }
 }
