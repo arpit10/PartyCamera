@@ -1,7 +1,7 @@
 export async function handler(event) {
   try {
     const body = JSON.parse(event.body);
-    console.log("📥 Incoming body:", Object.keys(body));
+    console.log("📥 Incoming body keys:", Object.keys(body));
 
     const { base64 } = body;
 
@@ -16,12 +16,14 @@ export async function handler(event) {
     const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
     const apiUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
-    // ✅ Strip the prefix completely
-    const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
+    // ✅ Make sure prefix exists
+    let fileData = base64;
+    if (!fileData.startsWith("data:image")) {
+      fileData = `data:image/jpeg;base64,${fileData}`;
+    }
 
-    // ✅ Send only the raw base64, without re-adding the prefix
     const formBody = new URLSearchParams();
-    formBody.append("file", base64Data);
+    formBody.append("file", fileData);
     formBody.append("upload_preset", uploadPreset);
 
     const res = await fetch(apiUrl, {
@@ -30,11 +32,8 @@ export async function handler(event) {
       body: formBody.toString(),
     });
 
-    console.log("res = ", res);
-    console.log("body = ", formBody.toString())
-
     const data = await res.json();
-    console.log("data = ", data)
+
     if (data.error) {
       console.error("❌ Cloudinary error:", data.error);
       return {
