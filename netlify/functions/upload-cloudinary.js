@@ -1,7 +1,6 @@
 export async function handler(event) {
   try {
     const body = JSON.parse(event.body);
-    console.log("body = ", body)
     console.log("📥 Incoming body keys:", Object.keys(body));
 
     const { base64 } = body;
@@ -17,16 +16,14 @@ export async function handler(event) {
     const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
     const apiUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
-    // ✅ Make sure prefix exists
-    let fileData = base64;
-    if (!fileData.startsWith("data:image")) {
-      fileData = `data:image/jpeg;base64,${fileData}`;
-    }
-    console.log("Filedata = ", fileData);
+    // 🔑 Remove the "data:image/jpeg;base64," prefix
+    const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
+
     const formBody = new URLSearchParams();
-    formBody.append("file", fileData);
+    formBody.append("file", `data:image/jpeg;base64,${base64Data}`);
     formBody.append("upload_preset", uploadPreset);
-    console.log("Form body = ", formBody.toString());
+
+    console.log("🚀 Sending to Cloudinary formData = ", formBody.toString());
 
     const res = await fetch(apiUrl, {
       method: "POST",
@@ -37,8 +34,7 @@ export async function handler(event) {
     const data = await res.json();
 
     if (data.error) {
-      console.error("Cloudinary error:", data.error);
-      console.log("Cloudinary error:", data.error)
+      console.error("❌ Cloudinary error:", data.error);
       return {
         statusCode: 500,
         body: JSON.stringify({ error: data.error.message }),
