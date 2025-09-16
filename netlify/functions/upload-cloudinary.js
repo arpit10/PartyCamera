@@ -22,7 +22,7 @@ export async function handler(event) {
     if (!fileData.startsWith("data:image")) {
       fileData = `data:image/jpeg;base64,${fileData}`;
     }
-    console.log("Filedata = ", filedata);
+    console.log("Filedata = ", fileData);
     const formBody = new URLSearchParams();
     formBody.append("file", fileData);
     formBody.append("upload_preset", uploadPreset);
