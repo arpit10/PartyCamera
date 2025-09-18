@@ -8,9 +8,9 @@ export default function Gallery() {
       try {
         const res = await fetch("/.netlify/functions/gallery-cloudinary");
         const data = await res.json();
-        setImages(data);
+        setImages(data); // array of resources
       } catch (err) {
-        console.error("Failed to load images:", err);
+        console.error("Gallery fetch failed", err);
       }
     }
     loadImages();
@@ -22,9 +22,9 @@ export default function Gallery() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {images.map((img) => (
           <img
-            key={img.public_id}
-            src={img.secure_url}
-            alt=""
+            key={img.asset_id}
+            src={img.secure_url}   // 👈 use secure_url directly
+            alt={img.public_id}
             className="rounded shadow"
           />
         ))}
