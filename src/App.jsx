@@ -274,6 +274,7 @@ export default function App() {
 
         <footer className="text-center text-xs text-neutral-500 mt-6">
           Disposable camera app created by Arpit Jain
+            <br />
           <Link to="/gallery" className="inline-block mt-2 bg-white text-black px-3 py-1 rounded-lg shadow">
             View Gallery 📸
           </Link>
