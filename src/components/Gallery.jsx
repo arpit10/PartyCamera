@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { fetchCloudinaryImages } from "../../netlify/functions/cloudinary";
 
 export default function Gallery() {
   const [images, setImages] = useState([]);
 
   useEffect(() => {
     async function loadImages() {
-      const results = await fetchCloudinaryImages();
-      setImages(results);
+      try {
+        const res = await fetch("/.netlify/functions/gallery-cloudinary");
+        const data = await res.json();
+        setImages(data);
+      } catch (err) {
+        console.error("Failed to load images:", err);
+      }
     }
     loadImages();
   }, []);
@@ -19,7 +23,7 @@ export default function Gallery() {
         {images.map((img) => (
           <img
             key={img.public_id}
-            src={`https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${img.public_id}.jpg`}
+            src={img.secure_url}
             alt=""
             className="rounded shadow"
           />

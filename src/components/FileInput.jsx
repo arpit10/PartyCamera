@@ -6,12 +6,12 @@ export default function FileInput({ onFileChange }) {
       <input
         type="file"
         accept="image/*"
-        capture="environment"
+        multiple   // ✅ allow selecting multiple from gallery
         onChange={onFileChange}
         className="block w-full"
       />
       <p className="file-input-text text-xs text-neutral-600 mt-2">
-        Use your phone camera; the photo compresses before upload.
+        Choose photos from your gallery or files.
       </p>
     </div>
   );

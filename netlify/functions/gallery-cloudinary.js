@@ -1,15 +1,21 @@
 // netlify/functions/gallery-cloudinary.js
-import fetch from "node-fetch";
 
 export async function handler() {
   try {
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-    // List recent images (max 30) - only "unsigned uploads" will show if preset is used
-    const url = `https://res.cloudinary.com/${cloudName}/image/list/${uploadPreset}.json`;
+    // Admin API endpoint: list uploaded images
+    const url = `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?max_results=30`;
 
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: {
+        Authorization:
+          "Basic " + Buffer.from(apiKey + ":" + apiSecret).toString("base64"),
+      },
+    });
+
     if (!res.ok) {
       throw new Error(`Cloudinary fetch failed: ${res.status}`);
     }
@@ -18,7 +24,7 @@ export async function handler() {
 
     return {
       statusCode: 200,
-      body: JSON.stringify(data.resources || []), // array of images
+      body: JSON.stringify(data.resources || []),
     };
   } catch (err) {
     console.error("Gallery fetch error:", err);
