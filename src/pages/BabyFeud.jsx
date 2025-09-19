@@ -1,23 +1,45 @@
 import { useState } from "react";
+import {useLocation, useSearchParams} from "react-router-dom";
 import babyFeudData from "../data/babyFeudData.js";
 
-function shuffle(array) {
-  let newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+//shuffle the order based on the seed passed as an argument.
+function seededShuffle(array, seed) {
+  let result = [...array];
+  let random = mulberry32(seed);
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
   }
-  return newArray;
+  return result;
 }
 
+// deterministic PRNG
+function mulberry32(a) {
+  return function () {
+    let t = (a += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 export default function BabyFeud() {
-  const [shuffledData] = useState(() => shuffle(babyFeudData));
+  const location = useLocation();
+  const isHost = new URLSearchParams(location.search).get("host") === "true";
+
+  // Use a fixed seed so order matches across devices, pass the seed as an argument in the url
+  // Game mode /baby-feud?seed=3245 host mode - /baby-feud?host=true&seed=3245
+
+  const [searchParams] = useSearchParams();
+  const seed = parseInt(searchParams.get("seed") || "2025", 10);
+
+  const shuffledData = seededShuffle(babyFeudData, seed);
+
   const [roundIndex, setRoundIndex] = useState(0);
   const [revealed, setRevealed] = useState([]);
 
-  // const round = babyFeudData[roundIndex];
   const round = shuffledData[roundIndex];
+
   const handleReveal = (i) => {
     if (!revealed.includes(i)) {
       setRevealed([...revealed, i]);
@@ -25,7 +47,7 @@ export default function BabyFeud() {
   };
 
   const nextRound = () => {
-    if (roundIndex < babyFeudData.length - 1) {
+    if (roundIndex < shuffledData.length - 1) {
       setRoundIndex(roundIndex + 1);
       setRevealed([]);
     }
@@ -33,7 +55,7 @@ export default function BabyFeud() {
 
   const previousRound = () => {
     if (roundIndex > 0) {
-      setRoundIndex(roundIndex-1);
+      setRoundIndex(roundIndex - 1);
       setRevealed([]);
     }
   };
@@ -60,7 +82,11 @@ export default function BabyFeud() {
                 ${revealed.includes(i) ? "bg-green-200" : "bg-gray-300"}
               `}
             >
-              {revealed.includes(i) ? `${ans.text} – ${ans.points}` : "❓"}
+              {revealed.includes(i)
+                ? `${ans.text} – ${ans.points}`
+                : isHost
+                ? `${ans.text} – ${ans.points}` // Host sees answers
+                : "❓"}
             </button>
           ))}
         </div>
@@ -71,7 +97,7 @@ export default function BabyFeud() {
             onClick={previousRound}
             disabled={roundIndex === 0}
             className={`px-4 py-2 rounded-lg shadow font-semibold ${
-              roundIndex === babyFeudData.length - 1
+              roundIndex === 0
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-500 text-white"
             }`}
@@ -86,16 +112,15 @@ export default function BabyFeud() {
           </button>
           <button
             onClick={nextRound}
-            disabled={roundIndex === babyFeudData.length - 1}
+            disabled={roundIndex === shuffledData.length - 1}
             className={`px-4 py-2 rounded-lg shadow font-semibold ${
-              roundIndex === babyFeudData.length - 1
+              roundIndex === shuffledData.length - 1
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-500 text-white"
             }`}
           >
             Next Round →
           </button>
-
         </div>
       </div>
     </div>
