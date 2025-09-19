@@ -1,11 +1,23 @@
 import { useState } from "react";
 import babyFeudData from "../data/babyFeudData.js";
 
+function shuffle(array) {
+  let newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
+
 export default function BabyFeud() {
+  const [shuffledData] = useState(() => shuffle(babyFeudData));
   const [roundIndex, setRoundIndex] = useState(0);
   const [revealed, setRevealed] = useState([]);
 
-  const round = babyFeudData[roundIndex];
+  // const round = babyFeudData[roundIndex];
+  const round = shuffledData[roundIndex];
   const handleReveal = (i) => {
     if (!revealed.includes(i)) {
       setRevealed([...revealed, i]);
@@ -34,7 +46,7 @@ export default function BabyFeud() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-pink-200 to-blue-200 p-6">
       <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 text-center">
         <h1 className="text-3xl font-extrabold mb-4">
-          👶 Baby Feud – Round {round.round}
+          👶 Baby Feud – Round {roundIndex + 1}
         </h1>
         <h2 className="text-xl font-semibold mb-6">{round.question}</h2>
 
