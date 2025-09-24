@@ -1,99 +1,116 @@
-# React + Vite
-# Digital Disposable Camera 📸
+# Party Camera + Baby Feud 🎉
 
-A reusable, component-based web app that allows users to take multiple photos and upload them toCloudinary. Optimized for events like parties and gatherings, this app ensures your photos are backed up even if upload fails.
-
-## Features
-
-- Take photos with live camera or upload from gallery to cloudinary
-- Take multiple photos before uploading
-- Download images to local device when images are clicked.
-- Parallel upload for faster performance
-- Automatic saving to device in case upload fails
-- Upload progress indicator
-- Component-based React structure for easy reuse
-- see gallery to check all the photos uploaded to cloudinary.
-
-## Setup
-
-1. Clone the repository:
-git clone https://github.com/arpit10/PartyCamera.git
-cd digitalDisposableCamera 
-2. Install dependencies:  npm install
-3. Create a .env file in the root:
-VITE_UPLOAD_URL=http://localhost:3000/upload  APPSCRIPT_SECRET=your-secret
-4. Run the local Proxy Server:
-node server.js
-5. Start the React app:
-npm run dev
-6. Open in your browser:
-http://localhost:5173
-
-
-
-
-
-# Baby Feud 🎉
-
-A fun **Family Feud–style game** customized for a baby shower / gender reveal party.  
-This project lets you play the game on a TV for guests, while the host can control and reveal answers from their own device.
+An interactive web app for **gender reveal parties / baby showers** that combines a  
+📸 **Cloudinary-powered camera & gallery** with a 🎮 **Baby Feud game**.
 
 ---
 
-## 🚀 How It Works
+## 📸 Party Camera
 
-- Questions and answers are preloaded into the app (`babyFeudData.js`).
-- The game is shown on the **TV screen** in **normal mode** (questions visible, answers hidden).
-- The **host device** (phone/laptop) can open the game in **host mode** to see the answers and reveal them at the right time.
-- Both views stay in sync by using the same **random seed** in the URL.
+Guests can snap pictures directly in the app or upload from their phone gallery.  
+All photos are automatically saved to **Cloudinary** and also downloaded to the guest’s device for backup.
+
+### Features
+- Take photos with the **in-app camera** (supports front/back switching).
+- Open the **native phone camera** (iOS/Android).
+- Upload photos from phone **gallery/files**.
+- Save photos locally as a fallback if upload fails.
+- Upload multiple photos at once.
+- Parallel uploads for faster performance.
+- Progress indicator for uploads.
+- View all uploaded photos in the **Gallery** page.
 
 ---
 
-## 🎮 Game Modes
+## 🎮 Baby Feud Game
 
-### Normal Mode (TV / Players)
-Shows only the question and blank answer slots.  
+A **Family Feud–style game** customized for baby showers and gender reveal parties.  
+The game is played on a **TV/projector** while the host controls the answers from their own device.
+
+### How It Works
+- All questions and answers live in `src/data/babyFeudData.js`.
+- The **TV/guest view** shows only questions and blank slots.
+- The **host view** reveals the answers and lets the host flip them one by one.
+- Both views stay in sync using a **seed** (random number in the URL).
+
+### Game Modes
+
+#### 👨‍👩‍👧 Player Mode (TV / Guests)
+Shows the question and hidden answers.  
 👉 URL format:
+```
 /baby-feud?seed=1234
+```
+Example:  
+`http://localhost:5173/baby-feud?seed=1234`
 
-Example:
-http://localhost:5173/baby-feud?seed=1234
-
----
-
-### Host Mode (Phone / Laptop)
-Shows the same question order, but with answers visible to the host for reference.  
+#### 🎤 Host Mode (Phone / Laptop)
+Shows the same order **with answers visible**.  
 👉 URL format:
+```
 /baby-feud?host=true&seed=1234
+```
+Example:  
+`http://localhost:5173/baby-feud?host=true&seed=1234`
 
-Example:
-http://localhost:5173/baby-feud?host=true&seed=1234
-
----
-
-## 🔑 Important Notes
-- The `seed` value ensures both **TV** and **Host** see the questions in the same order.  
-- Use **the same seed number** in both URLs (e.g., `1234`).  
-- Refreshing will keep the order consistent.  
-- Changing the seed creates a **new game order**.
+### Important Notes
+- The **seed value** ensures both host & TV stay in sync.
+- Refreshing won’t break the game as long as the seed stays the same.
+- To start a new game → just pick a new seed.
 
 ---
 
-## 🆕 Starting a New Game
-1. Pick a new random seed (any number, e.g., `5678`).
-2. Update both URLs with the new seed:
-   - TV: `/baby-feud?seed=5678`
-   - Host: `/baby-feud?host=true&seed=5678`
+## 🛠 Setup & Development
 
-This way, you don’t need to edit code to reset the questions.
+1. **Clone the repo**  
+   ```bash
+   git clone https://github.com/arpit10/PartyCamera.git
+   cd PartyCamera
+   ```
+
+2. **Install dependencies**  
+   ```bash
+   npm install
+   ```
+
+3. **Add environment variables** → create a `.env` file in the root:  
+   ```env
+   VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+   VITE_CLOUDINARY_UPLOAD_PRESET=your_unsigned_preset
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
+   ```
+
+4. **Run locally**  
+   ```bash
+   npm run dev
+   ```
+   App will be available at:  
+   `http://localhost:5173`
+
+5. **Deploy on Netlify** → just push to your GitHub repo and link with Netlify.  
+   Netlify will automatically use your `.env` variables.
 
 ---
 
-## 🛠 Development
-- Built with **React + React Router**.
-- Data lives in `src/data/babyFeudData.js`.
-- Shuffle order is controlled by a seeded shuffle function for consistent ordering across devices.
+## 📂 Project Structure
+
+```
+src/
+  components/      # Camera, Gallery, Inputs, etc.
+  pages/           # BabyFeud.jsx
+  data/            # babyFeudData.js (questions & answers)
+  App.jsx          # Main camera app
+  index.jsx        # Router setup
+
+netlify/functions/ # Serverless functions (upload, gallery)
+```
 
 ---
 
-🎉 Have fun hosting your **Baby Feud** game!
+## 🎉 Have Fun!
+- Guests use `/` (camera & upload).  
+- Everyone can see photos in `/gallery`.  
+- Host runs `/baby-feud?host=true&seed=XXXX` while TV shows `/baby-feud?seed=XXXX`.
+
+Enjoy capturing memories 📸 and playing Baby Feud 🎮 at your party!
